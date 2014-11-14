@@ -1,0 +1,141 @@
+<!DOCTYPE HTML>
+
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+    <title>flask+d3 Hello World</title>
+
+    <script src="http://d3js.org/d3.v2.js"></script>
+    <style>
+
+path.line {
+    fill: none;
+    stroke: #666;
+    stroke-width: 1.5px;
+}
+
+.domain {
+    stroke-width: 1px;
+}
+
+circle {
+    cursor: pointer;
+}
+
+.axis {
+    shape-rendering: crispEdges;
+}
+
+.axis line, .axis path {
+    stroke-width: 1px;
+    stroke: #000;
+    fill: none;
+}
+
+.tooltip {
+    display: none;
+}
+
+.tooltip.active {
+    display: block;
+}
+
+.tooltip rect {
+    fill: #ff0000;
+}
+
+    </style>
+
+</head>
+<body>
+
+    <h1>Visualizing Malaria Reported Cases and Deaths</h1>
+
+    <p>Data from <a href="http://apps.who.int/gho/data/node.main.A1364?lang=en">here</a>.</p>
+    <div id="info">
+        <div id="point-info">
+            Click on a point.
+        </div>
+    </div>
+
+    <div id="plot">
+    </div>
+
+
+    <script>
+
+        // Set up the plot window.
+        var margin = 80;
+        var w = 700 - 2 * margin, h = 500 - 2 * margin;
+        var svg = d3.select("#plot").append("svg")
+                        .attr("width", w + 2 * margin)
+                        .attr("height", h + 2 * margin)
+                        .append("svg:g")
+                        .attr("transform", "translate(" + margin + ", " + margin + ")");
+
+
+        // Axes scaling functions.
+        var xscale = d3.scale.linear().range([0, w]);
+        var yscale = d3.scale.linear().range([h, 0]);
+
+
+        // The axes objects themselves.
+        var xaxis = d3.svg.axis().scale(xscale).ticks(8);
+        var yaxis = d3.svg.axis().scale(yscale).ticks(8).orient("left");
+
+        svg.append("svg:g").attr("class", "x axis")
+                           .attr("transform", "translate(0, " + h + ")");
+
+        svg.append("svg:g").attr("class", "y axis");
+
+        // Add the label
+        svg.append("text")      // text label for the x axis
+                .attr("x", 265 )
+                .attr("y", 385 )
+                .style("text-anchor", "middle")
+                .text("Year");
+
+         svg.append("text")      // text label for the y axis
+                .attr("x", 0 )
+                .attr("y", 200 )
+                .style("text-anchor", "middle")
+                // TODO : Fix Y-Axis
+                .attr("transform", "rotate(90)")
+                .text("Cases");
+
+        // Show the information about a particular point.
+        var show_info = function (d) {
+            d3.select("#point-info").text("This is point " + d._id + ". "
+                + "It has the coordinates (" + d.year + ", " + d.numeric + ").");
+        };
+
+        // Load the data.
+        var callback = function (data) {
+            // Rescale the axes.
+            xscale.domain([d3.min(data, function (d) { return d.year; }) - 1,
+                           d3.max(data, function (d) { return d.year; }) + 1]);
+            yscale.domain([d3.min(data, function (d) { return d.numeric; }) - 100000,
+                           d3.max(data, function (d) { return d.numeric; }) + 100000]);
+
+            // Display the axes.
+            svg.select(".x.axis").call(xaxis);
+            svg.select(".y.axis").call(yaxis);
+
+            // Insert the data points.
+            svg.selectAll("circle").data(data).enter()
+                .append("circle")
+                    .attr("id", function (d) { return d._id; })
+                    .attr("cx", function (d) { return xscale(d.year); })
+                    .attr("cy", function (d) { return yscale(d.numeric); })
+                    .attr("r", 10)
+                    .style("fill", "#2AA198")
+                    .on("mousedown", show_info);
+        };
+
+        d3.json("/jendata", callback);
+
+    </script>
+
+</body>
+</html>
