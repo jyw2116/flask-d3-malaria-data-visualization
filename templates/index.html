@@ -7,6 +7,7 @@
     <title>flask+d3 Hello World</title>
 
     <script src="http://d3js.org/d3.v2.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <style>
 
 path.line {
@@ -50,7 +51,7 @@ circle {
 </head>
 <body>
 
-    <h1>Visualizing Malaria Reported Cases and Deaths</h1>
+    <h1>Visualizing Malaria Reported Cases and Deaths in {{ country }} </h1>
 
     <p>Data from <a href="http://apps.who.int/gho/data/node.main.A1364?lang=en">here</a>.</p>
     <div id="info">
@@ -59,8 +60,14 @@ circle {
         </div>
     </div>
 
+    <script>
+    function getCountryData(country) {
+        window.location.replace("http://localhost:8000/search/" + country);
+    }
+    </script>
+
     <form method="post">
-         <select name="countries">
+         <select onchange="getCountryData(this.value)" name="countries">
              {% for item in countries %}
              <option value="{{item}}">{{item}}</option>
              {% endfor %}
@@ -144,7 +151,7 @@ circle {
                     .on("mousedown", show_info);
         };
 
-        d3.json("/jendata", callback);
+        d3.json("/jendata/{{country}}", callback);
 
     </script>
 
