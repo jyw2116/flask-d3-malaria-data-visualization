@@ -59,6 +59,17 @@ circle {
         </div>
     </div>
 
+    <form method="post">
+         <select name="countries">
+             {% for item in countries %}
+             <option value="{{item}}">{{item}}</option>
+             {% endfor %}
+         </select>
+
+        <br>
+        <input type="submit">
+    </form>
+
     <div id="plot">
     </div>
 

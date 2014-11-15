@@ -5,6 +5,7 @@ from os.path import join
 
 app = flask.Flask(__name__)
 
+file_name = join('data', 'reported_confirmed_cases.csv')
 
 @app.route("/")
 def index():
@@ -12,11 +13,11 @@ def index():
     When you request the root path, you'll get the index.html template.
 
     """
-    return flask.render_template("index.html")
+    return flask.render_template("index.html", countries=parseCountries())
 
 
 @app.route("/jendata")
-def selectColumns(file_name = join('data', 'reported_confirmed_cases.csv')):
+def selectColumns(file_name = file_name):
     """
     DESCRIPTION!!!
     :param blarg:
@@ -34,6 +35,17 @@ def selectColumns(file_name = join('data', 'reported_confirmed_cases.csv')):
                         }
                        )
     return json.dumps(arr_tuple)
+
+
+def parseCountries(file_name = file_name):
+
+    input_file = csv.DictReader(open(file_name))
+    countries = set()
+
+    for row in input_file:
+        countries.add(row['Country'].decode('utf8'))
+
+    return sorted(countries)
 
 
 if __name__ == "__main__":
